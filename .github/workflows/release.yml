@@ -25,8 +25,6 @@ jobs:
     
     - name: Build Electron App
       run: yarn build:electron
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Upload Release Assets
       uses: actions/upload-artifact@v4

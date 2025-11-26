@@ -26,8 +26,6 @@ nsis:
   uninstallerIcon: assets/icon.ico
   runAfterFinish: true
 
-publish:
-  provider: github
-  owner: AgentBurgundy
-  repo: screensaver
+# Publishing handled by GitHub Actions workflow, not electron-builder
+publish: null
 
