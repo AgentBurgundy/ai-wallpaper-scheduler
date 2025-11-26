@@ -33,7 +33,6 @@ jobs:
         Copy-Item dist/screensaver-setup.exe release/
         Copy-Item env.example.txt release/
         Copy-Item README.md release/
-        Copy-Item SETUP.md release/
         Copy-Item LICENSE release/
         # Important: Include "windows" in filename for auto-update system
         Compress-Archive -Path release/* -DestinationPath screensaver-${{ github.ref_name }}-windows.zip -Force
