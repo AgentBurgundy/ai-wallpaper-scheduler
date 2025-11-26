@@ -1,36 +1,30 @@
-appId: com.screensaver.app
-productName: Screensaver
+appId: com.aiwallpaper.app
+productName: AI Wallpaper
 copyright: Copyright © 2024
 
 directories:
-  buildResources: build
   output: dist-installer
 
 files:
   - dist/**/*
   - package.json
   - assets/**/*
-  - env.example.txt
-  - README.md
 
 win:
   target:
     - nsis
   icon: assets/icon.ico
   requestedExecutionLevel: asInvoker
-  # Icon sizes will be automatically extracted from the ICO file
-  # Ensure icon.ico contains: 16x16, 24x24, 32x32, 48x48, 256x256
 
 nsis:
-  oneClick: false
-  allowToChangeInstallationDirectory: true
+  oneClick: true
+  perMachine: false
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: Screensaver
+  shortcutName: AI Wallpaper
   installerIcon: assets/icon.ico
   uninstallerIcon: assets/icon.ico
-  license: LICENSE
-  include: build/installer.nsh
+  runAfterFinish: true
 
 publish:
   provider: github

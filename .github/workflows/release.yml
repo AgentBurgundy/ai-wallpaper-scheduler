@@ -23,49 +23,46 @@ jobs:
     - name: Install dependencies
       run: yarn install
     
-    - name: Build executable
-      run: yarn build:exe
+    - name: Build Electron App
+      run: yarn build:electron
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Build setup executable
-      run: yarn build:setup-exe
-    
-    - name: Create Release Archive
-      run: |
-        New-Item -ItemType Directory -Force -Path release
-        Copy-Item dist/screensaver.exe release/
-        Copy-Item dist/screensaver-setup.exe release/
-        Copy-Item env.example.txt release/
-        Copy-Item README.md release/
-        Copy-Item LICENSE release/
-        # Important: Include "windows" in filename for auto-update system
-        Compress-Archive -Path release/* -DestinationPath screensaver-${{ github.ref_name }}-windows.zip -Force
-    
-    - name: Upload Release Asset
+    - name: Upload Release Assets
       uses: actions/upload-artifact@v4
       with:
         name: screensaver-windows-${{ github.ref_name }}
-        path: screensaver-${{ github.ref_name }}-windows.zip
+        path: dist-installer/*.exe
     
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        files: screensaver-${{ github.ref_name }}-windows.zip
+        files: |
+          dist-installer/*.exe
         body: |
-          ## Screensaver ${{ github.ref_name }}
+          ## AI Wallpaper Generator ${{ github.ref_name }}
           
-          ### 🚀 Quick Start (No Node.js Required!)
+          ### 🚀 Quick Start
           
-          1. Download and extract `screensaver-${{ github.ref_name }}-windows.zip`
-          2. Run `screensaver-setup.exe` to configure your API key
-          3. Run `screensaver.exe` to update your wallpaper!
-          4. (Optional) Set up Windows Task Scheduler for daily updates
+          1. Download and run the installer (`Screensaver-Setup-*.exe`)
+          2. The app will start in your system tray (look for the icon near your clock)
+          3. Right-click the tray icon → **Open Settings**
+          4. Enter your Google API key and configure your preferences
+          5. Click **Generate Wallpaper** to create your first AI wallpaper!
+          
+          ### ✨ Features
+          
+          - 🎨 AI-powered wallpaper generation using Google Gemini
+          - 📌 Lives in your system tray - always accessible
+          - ⚙️ Easy settings UI - no config files to edit
+          - 📅 Automatic daily wallpaper updates
+          - 🔄 Auto-updates when new versions are released
+          - 🖼️ Supports 1K, 2K, and 4K resolutions
           
           ### 📋 Requirements
           
           - Windows 10/11
-          - Google API key (get from your API provider)
-          
-          See [README.md](README.md) for full documentation.
+          - Google API key (free from [Google AI Studio](https://aistudio.google.com/apikey))
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
