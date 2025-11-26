@@ -16,16 +16,16 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-        cache: 'npm'
+        cache: 'yarn'
     
     - name: Install dependencies
-      run: npm ci
+      run: yarn install --frozen-lockfile
     
     - name: Build executable
-      run: npm run build:exe
+      run: yarn build:exe
     
     - name: Build setup executable
-      run: npm run build:setup-exe
+      run: yarn build:setup-exe
     
     - name: Create Release Archive
       run: |
