@@ -1,0 +1,10 @@
+# Assets Directory
+
+Place your icon files here:
+- icon.ico (multi-size Windows icon)
+- tray-icon.png (16x16 or 32x32 for system tray)
+- icon.png (256x256 fallback)
+
+See ICONS.md for detailed instructions.
+
+

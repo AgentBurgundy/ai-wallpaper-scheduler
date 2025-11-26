@@ -1,0 +1,74 @@
+{
+  "name": "screensaver",
+  "version": "1.0.0",
+  "description": "AI-powered daily desktop background generator using Google Nano Banana Pro API",
+  "type": "module",
+  "main": "dist/electron/main.js",
+  "appMain": "dist/index.js",
+  "scripts": {
+    "build": "tsc && npm run build:preload",
+    "build:preload": "tsc -p tsconfig.preload.json",
+    "build:electron": "tsc && electron-builder",
+    "build:electron:dir": "tsc && electron-builder --dir",
+    "build:exe": "npm run build && npm run bundle && npm run package",
+    "build:setup-exe": "npm run build && npm run build:setup-ts && npm run bundle:setup && npm run package:setup",
+    "build:setup-ts": "tsc src/setup-exe.ts --outDir dist --module commonjs --target ES2020 --esModuleInterop --skipLibCheck",
+    "bundle": "node esbuild.config.js",
+    "bundle:setup": "node esbuild.config.setup.js",
+    "package": "pkg dist/bundle.js --targets node18-win-x64 --output dist/screensaver.exe",
+    "package:setup": "pkg dist/bundle-setup.js --targets node18-win-x64 --output dist/screensaver-setup.exe",
+    "package:all": "pkg dist/bundle.js --targets node18-win-x64,node18-win-arm64 --output dist/screensaver.exe",
+    "electron": "npm run build && electron dist/electron/main.js",
+    "electron:dev": "npm run build && electron dist/electron/main.js",
+    "electron:watch": "tsc --watch",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "watch": "tsc --watch",
+    "setup": "tsx src/setup.ts"
+  },
+  "keywords": [
+    "wallpaper",
+    "ai",
+    "image-generation",
+    "desktop-background",
+    "windows",
+    "automation",
+    "open-source"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AgentBurgundy/screensaver.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AgentBurgundy/screensaver/issues"
+  },
+  "homepage": "https://github.com/AgentBurgundy/screensaver#readme",
+  "dependencies": {
+    "@google/genai": "^1.30.0",
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1",
+    "electron": "^28.0.0",
+    "electron-updater": "^6.1.0",
+    "wallpaper": "^7.2.1",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/electron": "^1.6.10",
+    "@types/node": "^20.10.0",
+    "electron-builder": "^24.9.1",
+    "esbuild": "^0.19.0",
+    "pkg": "^5.8.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  },
+  "pkg": {
+    "assets": [
+      "package.json"
+    ],
+    "scripts": [
+      "dist/bundle.js"
+    ]
+  }
+}

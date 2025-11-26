@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build executable
+      run: npm run build:exe
+    
+    - name: Build setup executable
+      run: npm run build:setup-exe
+    
+    - name: Create Release Archive
+      run: |
+        New-Item -ItemType Directory -Force -Path release
+        Copy-Item dist/screensaver.exe release/
+        Copy-Item dist/screensaver-setup.exe release/
+        Copy-Item env.example.txt release/
+        Copy-Item README.md release/
+        Copy-Item SETUP.md release/
+        Copy-Item LICENSE release/
+        # Important: Include "windows" in filename for auto-update system
+        Compress-Archive -Path release/* -DestinationPath screensaver-${{ github.ref_name }}-windows.zip -Force
+    
+    - name: Upload Release Asset
+      uses: actions/upload-artifact@v4
+      with:
+        name: screensaver-windows-${{ github.ref_name }}
+        path: screensaver-${{ github.ref_name }}-windows.zip
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: screensaver-${{ github.ref_name }}-windows.zip
+        body: |
+          ## Screensaver ${{ github.ref_name }}
+          
+          ### 🚀 Quick Start (No Node.js Required!)
+          
+          1. Download and extract `screensaver-${{ github.ref_name }}-windows.zip`
+          2. Run `screensaver-setup.exe` to configure your API key
+          3. Run `screensaver.exe` to update your wallpaper!
+          4. (Optional) Set up Windows Task Scheduler for daily updates
+          
+          ### 📋 Requirements
+          
+          - Windows 10/11
+          - Google API key (get from your API provider)
+          
+          See [README.md](README.md) for full documentation.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
