@@ -20,6 +20,8 @@ const isDev = !app.isPackaged;
 const appDir = isDev ? path.resolve(__dirname, '..', '..') : path.dirname(process.execPath);
 // resourcesDir: where bundled assets are (inside app.asar in production)
 const resourcesDir = isDev ? path.resolve(__dirname, '..', '..') : app.getAppPath();
+// electronDir: where main.js and preload.js are located
+const electronDir = isDev ? __dirname : path.join(app.getAppPath(), 'dist', 'electron');
 
 // Get the user data directory for storing config and images
 function getUserDataDir(): string {
@@ -138,22 +140,17 @@ async function openSettingsWindow() {
     return;
   }
 
-  // Resolve preload script path
-  // In production, app files are in resourcesDir (inside asar or resources/app)
-  // In dev, they're in __dirname
-  const preloadPath = isDev 
-    ? path.join(__dirname, 'preload.js')
-    : path.join(resourcesDir, 'dist', 'electron', 'preload.js');
+  // Resolve preload script path using electronDir
+  const preloadPath = path.join(electronDir, 'preload.js');
   
-  // Verify preload file exists
-  try {
-    await fs.access(preloadPath);
-    logger.debug('Preload script found at:', preloadPath);
-  } catch (error) {
-    logger.error('Preload script not found at:', preloadPath);
-    logger.error('App path:', app.getAppPath());
-    logger.error('__dirname:', __dirname);
-  }
+  logger.debug('Preload script path:', preloadPath);
+  logger.debug('electronDir:', electronDir);
+  logger.debug('isDev:', isDev);
+  
+  // Write settings HTML to a temp file (data: URLs don't work with preload scripts)
+  const settingsHtmlPath = path.join(app.getPath('userData'), 'settings.html');
+  await fs.writeFile(settingsHtmlPath, getSettingsHTML(), 'utf-8');
+  logger.debug('Settings HTML written to:', settingsHtmlPath);
   
   settingsWindow = new BrowserWindow({
     width: 600,
@@ -168,8 +165,8 @@ async function openSettingsWindow() {
     title: 'AI Wallpaper Settings'
   });
 
-  // Load the settings HTML (using inline HTML since we don't have a separate file)
-  settingsWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(getSettingsHTML())}`);
+  // Load the settings HTML from file (preload works with file:// URLs)
+  settingsWindow.loadFile(settingsHtmlPath);
 
   settingsWindow.on('closed', () => {
     settingsWindow = null;

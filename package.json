@@ -1,6 +1,6 @@
 {
   "name": "screensaver",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "AI-powered daily desktop background generator using Google Nano Banana Pro API",
   "type": "module",
   "main": "dist/electron/main.js",
