@@ -16,7 +16,10 @@ const __dirname = path.dirname(__filename);
 
 // For Electron, we need to handle paths differently
 const isDev = !app.isPackaged;
+// appDir: where the executable is (for external files like update.zip)
 const appDir = isDev ? path.resolve(__dirname, '..', '..') : path.dirname(process.execPath);
+// resourcesDir: where bundled assets are (inside app.asar in production)
+const resourcesDir = isDev ? path.resolve(__dirname, '..', '..') : app.getAppPath();
 
 // Get the user data directory for storing config and images
 function getUserDataDir(): string {
@@ -50,7 +53,7 @@ let updateService: UpdateService | null = null;
 // Get package info
 async function getPackageInfo() {
   try {
-    const packagePath = path.join(appDir, 'package.json');
+    const packagePath = path.join(resourcesDir, 'package.json');
     const packageContent = await fs.readFile(packagePath, 'utf-8');
     return JSON.parse(packageContent);
   } catch {
@@ -75,7 +78,7 @@ function extractRepoInfo(repoUrl: string): { owner: string; name: string } {
 
 async function createTray() {
   // Create tray icon (using a simple icon - you can replace with actual icon file)
-  const iconPath = path.join(appDir, 'assets', 'tray-icon.png');
+  const iconPath = path.join(resourcesDir, 'assets', 'tray-icon.png');
   
   // Fallback to a simple icon if file doesn't exist
   let trayIcon = nativeImage.createEmpty();
@@ -136,9 +139,11 @@ async function openSettingsWindow() {
   }
 
   // Resolve preload script path
+  // In production, app files are in resourcesDir (inside asar or resources/app)
+  // In dev, they're in __dirname
   const preloadPath = isDev 
     ? path.join(__dirname, 'preload.js')
-    : path.join(path.dirname(process.execPath), 'electron', 'preload.js');
+    : path.join(resourcesDir, 'dist', 'electron', 'preload.js');
   
   // Verify preload file exists
   try {
@@ -146,6 +151,8 @@ async function openSettingsWindow() {
     logger.debug('Preload script found at:', preloadPath);
   } catch (error) {
     logger.error('Preload script not found at:', preloadPath);
+    logger.error('App path:', app.getAppPath());
+    logger.error('__dirname:', __dirname);
   }
   
   settingsWindow = new BrowserWindow({
@@ -157,8 +164,8 @@ async function openSettingsWindow() {
       contextIsolation: true,
       preload: preloadPath
     },
-    icon: path.join(appDir, 'assets', 'icon.png'),
-    title: 'Screensaver Settings'
+    icon: path.join(resourcesDir, 'assets', 'icon.png'),
+    title: 'AI Wallpaper Settings'
   });
 
   // Load the settings HTML (using inline HTML since we don't have a separate file)
@@ -880,7 +887,7 @@ async function updateWallpaper() {
       tray.displayBalloon({
         title: 'API Key Required',
         content: 'Please configure your Google API key in Settings first.',
-        icon: path.join(appDir, 'assets', 'icon.png')
+        icon: path.join(resourcesDir, 'assets', 'icon.png')
       });
     }
     openSettingsWindow();
@@ -920,7 +927,7 @@ async function updateWallpaper() {
         tray.displayBalloon({
           title: 'Success',
           content: 'Wallpaper updated successfully!',
-          icon: path.join(appDir, 'assets', 'icon.png')
+          icon: path.join(resourcesDir, 'assets', 'icon.png')
         });
       }
     } catch (error) {
@@ -929,7 +936,7 @@ async function updateWallpaper() {
         tray.displayBalloon({
           title: 'Error',
           content: 'Failed to update wallpaper: ' + (error instanceof Error ? error.message : 'Unknown error'),
-          icon: path.join(appDir, 'assets', 'icon.png')
+          icon: path.join(resourcesDir, 'assets', 'icon.png')
         });
       }
       throw error;
@@ -952,7 +959,7 @@ async function updateWallpaper() {
         tray.displayBalloon({
           title: 'Error',
           content: 'Failed to update wallpaper. Please check Settings.',
-          icon: path.join(appDir, 'assets', 'icon.png')
+          icon: path.join(resourcesDir, 'assets', 'icon.png')
         });
       }
       throw error;
@@ -989,7 +996,7 @@ async function checkForUpdates() {
         tray.displayBalloon({
           title: 'Update Available',
           content: `Version ${updateInfo.version} is available. Open Settings to update.`,
-          icon: path.join(appDir, 'assets', 'icon.png')
+          icon: path.join(resourcesDir, 'assets', 'icon.png')
         });
       }
     }
@@ -1109,7 +1116,7 @@ app.whenReady().then(async () => {
         tray.displayBalloon({
           title: 'Configuration Required',
           content: 'Please configure your Google API key in Settings to start using Screensaver.',
-          icon: path.join(appDir, 'assets', 'icon.png')
+          icon: path.join(resourcesDir, 'assets', 'icon.png')
         });
       }
       // Open settings window after a short delay
@@ -1159,7 +1166,7 @@ app.whenReady().then(async () => {
         tray.displayBalloon({
           title: 'Initialization Error',
           content: 'An error occurred during startup. Check logs for details.',
-          icon: path.join(appDir, 'assets', 'icon.png')
+          icon: path.join(resourcesDir, 'assets', 'icon.png')
         });
       }
     }
